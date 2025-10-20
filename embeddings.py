@@ -9,8 +9,10 @@ from chromadb import Documents, EmbeddingFunction, Embeddings
 from pprint import pprint
 from tqdm import tqdm
 import uuid
+from utils import get_images_path
+from chromadb.api.types import Embeddable
 
-class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
+class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
     def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = 'mps') -> None:
         super().__init__()
         self.model_name = model_name
@@ -27,7 +29,7 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
         inputs = self.processor(images=img, return_tensors='pt').to(self.device)
         return inputs
     
-    def __call__(self, input: list[Path | str]) -> Embeddings:
+    def __call__(self, input: list[Path]) -> Embeddings:
         all_embeddings = []
         print(f"🔹 Embedding generation for {len(input)} images...")
 
@@ -41,18 +43,18 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
         print("✅ Embeddings finished.")
         return all_embeddings
 
-def get_images_path() -> list[Path]:
-    script_dir = Path(__file__).parent
-    data_dir = script_dir / 'data/portrait-0.1k'
-    images = list(data_dir.rglob('*.jpg'))
-    print(f"{len(images)} images found.")
-    return images
+# def get_images_path() -> list[Path]:
+#     script_dir = Path(__file__).parent
+#     data_dir = script_dir / 'data/portrait-0.1k'
+#     images = list(data_dir.rglob('*.jpg'))
+#     print(f"{len(images)} images found.")
+#     return images
 
-def query_image(image_to_query: list[Path]):
-    return collection.query(
-    query_embeddings=embed_function(query_image),
-    n_results=5,
-    include=["distances", 'metadatas']) # type: ignore
+# def query_image(image_to_query: list[Path]):
+#     return collection.query(
+#     query_embeddings=embed_function(query_image),
+#     n_results=5,
+#     include=["distances", 'metadatas']) # type: ignore
     
 
 if __name__ == '__main__':
@@ -63,26 +65,26 @@ if __name__ == '__main__':
     
     images_path = get_images_path()
     
-    embed_function = EfficientNetImageEmbedding(device='cpu')
+    # embed_function = EfficientNetImageEmbedding(device='cpu')
 
-    chroma_client = chromadb.Client()
-    collection = chroma_client.create_collection(
-        name='my_collection',
-        embedding_function=embed_function
-    )
+    # chroma_client = chromadb.Client()
+    # collection = chroma_client.create_collection(
+    #     name='my_collection',
+    #     embedding_function=embed_function
+    # )
     
     ids = [str(uuid.uuid4()) for _ in files]
     
-    embeddings = embed_function(files)
+    # embeddings = embed_function(files)
     
-    metadata = [{"path": str(f), "filename": f.name} for f in files]
+    metadatas = [{"path": str(f), "filename": f.name} for f in files]
     
-    collection.upsert(
-        ids=ids,
-        embeddings=embeddings,
-        metadatas=metadata)
+    # collection.upsert(
+    #     ids=ids,
+    #     embeddings=embeddings,
+    #     metadatas=metadata)
     
-    print(f"{len(embeddings)} embeddings ajoutés à la collection.")
+    # print(f"{len(embeddings)} embeddings ajoutés à la collection.")
     
     image_to_query = [Path(__file__).parent / 'data/test/mona-lisa-test.jpg']
 
