@@ -8,6 +8,7 @@ import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from pprint import pprint
 from tqdm import tqdm
+import uuid
 
 class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
     def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = 'mps') -> None:
@@ -62,12 +63,16 @@ if __name__ == '__main__':
         embedding_function=embed_function
     )
     
-    
-    ids = [f"id_{i}" for i in range(len(files))]
+    ids = [str(uuid.uuid4()) for _ in files]
     
     embeddings = embed_function(files)
     
-    collection.upsert(ids=ids, embeddings=embeddings)
+    metadata = [{"path": str(f), "filename": f.name} for f in files]
+    
+    collection.upsert(
+        ids=ids,
+        embeddings=embeddings,
+        metadatas=metadata)
     
     print(f"{len(embeddings)} embeddings ajoutés à la collection.")
     
@@ -76,7 +81,7 @@ if __name__ == '__main__':
     results = collection.query(
     query_embeddings=embed_function(query_image),
     n_results=5,
-    include=["embeddings", "distances"]) # type: ignore
+    include=["distances", 'metadatas']) # type: ignore
     
     print()
     pprint(results)
