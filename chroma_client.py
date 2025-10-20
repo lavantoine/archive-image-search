@@ -33,7 +33,7 @@ class ChromaBase():
 
     def query_image(self, image_to_query: list[Path], n_results: int = 3, include: list = ["distances", 'metadatas']) -> QueryResult:
         return self.collection.query(
-            query_embeddings=self.embedding_function(image_to_query),
+            query_embeddings=self.embedding_function(input=image_to_query),
             n_results=n_results,
             include=include
             ) # type: ignore
