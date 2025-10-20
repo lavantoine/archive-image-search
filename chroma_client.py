@@ -6,19 +6,19 @@ logger = logging.getLogger(__name__)
 from pathlib import Path
 
 
-class chroma_base():
+class ChromaBase():
     def __init__(self) -> None:
-        self.embedding_function = EfficientNetImageEmbedding(device='cpu')
+        self.embedding_function = EfficientNetImageEmbedding()
         self.chroma_client = chromadb.Client()
         self.collection = self.chroma_client.create_collection(
             name='my_collection',
             embedding_function=self.embedding_function
         )
     
-    def compute_embeddings(self, images) -> Embeddings:
-        return self.embedding_function(images)
+    def compute_embeddings(self, filespath) -> Embeddings:
+        return self.embedding_function(filespath)
     
-    def add_to_collection(self, ids, embeddings, metadatas):
+    def add_to_collection(self, ids: list[str], embeddings, metadatas):
         self.collection.upsert(
             ids=ids,
             embeddings=embeddings,
