@@ -12,6 +12,17 @@ from pprint import pprint
 
 def main():
     st.title('M2RS 0.1')
+    
+    uploaded_photo = st.file_uploader(label="Merci de choisir une image :", type=["jpg", "jpeg", "png"])
+    if uploaded_photo is not None:
+        _, center, _ = st.columns((1,2,1))
+        center.image(
+            image=uploaded_photo.getvalue(),
+            caption=uploaded_photo.name,
+            use_column_width=True
+        )
+    
+    st.subheader('Images similaires :')
 
     # images_path = get_images_path()
 

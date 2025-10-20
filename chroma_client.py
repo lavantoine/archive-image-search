@@ -1,16 +1,21 @@
 import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings, QueryResult
 from embeddings import EfficientNetImageEmbedding
-import logging
-logger = logging.getLogger(__name__)
 from pathlib import Path
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("log.log", encoding="utf-8")]
+)
+logger = logging.getLogger(__name__)
 
 class ChromaBase():
     def __init__(self) -> None:
         self.embedding_function = EfficientNetImageEmbedding()
         self.chroma_client = chromadb.Client()
-        self.collection = self.chroma_client.create_collection(
+        self.collection = self.chroma_client.get_or_create_collection(
             name='my_collection',
             embedding_function=self.embedding_function
         )
@@ -24,7 +29,7 @@ class ChromaBase():
             embeddings=embeddings,
             metadatas=metadatas
             )
-        logger.info(f"{len(embeddings)} embeddings add to collection.")
+        logger.info(msg=f"{len(embeddings)} embeddings added to collection")
 
     def query_image(self, image_to_query: list[Path], n_results: int = 3, include: list = ["distances", 'metadatas']) -> QueryResult:
         return self.collection.query(
