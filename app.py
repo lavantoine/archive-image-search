@@ -2,27 +2,19 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
+from main import get_images_path, query_image
+from pathlib import Path
 
-st.title('Uber pickups in NYC')
 
-DATE_COLUMN = 'date/time'
-DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
-         'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+st.title('M2RS 0.1')
 
-@st.cache_data
-def load_data(nrows):
-    data = pd.read_csv(DATA_URL, nrows=nrows)
-    lowercase = lambda x: str(x).lower()
-    data.rename(lowercase, axis='columns', inplace=True)
-    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
-    return data
+images_path = get_images_path()
 
-# Create a text element and let the reader know the data is loading.
-data_load_state = st.text('Loading data...')
-# Load 10,000 rows of data into the dataframe.
-data = load_data(10000)
-# Notify the reader that the data was successfully loaded.
-data_load_state.text("Done! (using st.cache_data)")
+for col in st.columns(3):
+    with col:
+        st.image(str(images_path[0]))
 
-with st.spinner('grgeseweaegs'):
-    time.sleep(10)
+image_to_query = [Path(__file__).parent / 'data/test/mona-lisa-test.jpg']
+result = query_image(image_to_query)
+
+st.write(result)

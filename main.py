@@ -16,11 +16,8 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
         self.model_name = model_name
         self.device = device
         
-        # Processor:
-        # - resize to the expected size
-        # - convert the image to a tensor [C, H, W] (channels × height × width)
-        # - normalize the pixels (often between -1 and 1 or 0 and 1)
-        # - add the batch dimension: [batch, C, H, W] e.g. how many samples (images) are fed to the model
+        # Processor: resize, convert to tensor [C,H,W] (channels × height × width),
+        # normalize pixels, add batch dim [B,C,H,W]
         self.processor = AutoImageProcessor.from_pretrained(self.model_name)
         # Model: transform the tensor to embeddings or prediction
         self.model = AutoModel.from_pretrained(self.model_name).to(self.device)
@@ -44,16 +41,27 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Documents]):
         print("✅ Embeddings finished.")
         return all_embeddings
 
+def get_images_path() -> list[Path]:
+    script_dir = Path(__file__).parent
+    data_dir = script_dir / 'data/portrait-0.1k'
+    images = list(data_dir.rglob('*.jpg'))
+    print(f"{len(images)} images found.")
+    return images
+
+def query_image(image_to_query: list[Path]):
+    return collection.query(
+    query_embeddings=embed_function(query_image),
+    n_results=5,
+    include=["distances", 'metadatas']) # type: ignore
+    
+
 if __name__ == '__main__':
     # For TPU acceleration
     device = "mps" if torch.backends.mps.is_available() else "cpu"
     device = 'cpu'
     model_name = 'google/efficientnet-b7'
-
-    script_dir = Path(__file__).parent
-    data_dir = script_dir / 'data/portrait-0.1k'
-    files = list(data_dir.rglob('*.jpg'))
-    print(f"{len(files)} images trouvées.")
+    
+    images_path = get_images_path()
     
     embed_function = EfficientNetImageEmbedding(device='cpu')
 
@@ -76,12 +84,9 @@ if __name__ == '__main__':
     
     print(f"{len(embeddings)} embeddings ajoutés à la collection.")
     
-    query_image = [script_dir / 'data/test/mona-lisa-test.jpg']
-    
-    results = collection.query(
-    query_embeddings=embed_function(query_image),
-    n_results=5,
-    include=["distances", 'metadatas']) # type: ignore
+    image_to_query = [Path(__file__).parent / 'data/test/mona-lisa-test.jpg']
+
+    results = query_image(image_to_query)
     
     print()
     pprint(results)
