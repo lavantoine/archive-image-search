@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
-from utils import get_images_path
+from utils import get_all_images_path, generate_id
 from pathlib import Path
 from chroma_client import ChromaBase
 import torch
@@ -12,14 +12,38 @@ import tempfile
 from PIL import Image
 from io import BytesIO
 
+@st.cache_resource
+def initialize_chroma() -> ChromaBase:
+    chroma_base = ChromaBase()
+    
+    all_images_path = get_all_images_path()
+    all_ids = [generate_id(_) for _ in all_images_path]
+    
+    new_images_path, new_ids = chroma_base.keep_new_only(all_images_path, ids=all_ids)
+    metadatas = [{"path": str(i_path), "filename": i_path.name} for i_path in new_images_path]
+    
+    # with st.spinner('Création de la base, merci de patienter...'):
+    if new_ids:
+        embeddings = chroma_base.compute_embeddings(filespath=new_images_path)
+
+        chroma_base.add_to_collection(
+            ids=new_ids,
+            embeddings=embeddings,
+            metadatas=metadatas
+            )
+    return chroma_base
 
 def main():
     st.set_page_config(
         page_title='M2RS 0.1'
     )
     st.title('M2RS 0.1')
+    st.write('Texte explicatif...')
+    
+    chroma_base = initialize_chroma()
     
     uploaded_image = st.file_uploader(label="Merci de choisir une image :", type=["jpg", "jpeg", "png"])
+    
     if uploaded_image is not None:
         image_bytes = uploaded_image.getvalue()
         _, center, _ = st.columns((1,2,1))
@@ -36,23 +60,8 @@ def main():
         
         st.subheader('Images similaires :')
 
-        chroma_base = ChromaBase()
-        
-        images_path = get_images_path()
-        ids = [str(uuid.uuid4()) for _ in images_path]
-        metadatas = [{"path": str(i_path), "filename": i_path.name} for i_path in images_path]
-        
-        with st.spinner('Création de la base, merci de patienter...'):
-            embeddings = chroma_base.compute_embeddings(filespath=images_path)
-        
-            chroma_base.add_to_collection(
-                ids=ids,
-                embeddings=embeddings,
-                metadatas=metadatas
-                )
-    
         image_to_query = [image_path]
-        results = chroma_base.query_image(image_to_query=image_to_query)
+        results = chroma_base.query_image(image_to_query=image_to_query, n_results=12)
         
         cols = st.columns(3)
         for i, metadata in enumerate(results['metadatas'][0]):

@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageFile
 from transformers import AutoImageProcessor, AutoModel
 from time import perf_counter
 import numpy as np
@@ -8,6 +8,7 @@ import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from tqdm import tqdm
 from chromadb.api.types import Embeddable
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
     def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = 'cpu') -> None:
@@ -31,11 +32,13 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
         print(f"🔹 Embedding generation for {len(input)} images...")
 
         for img_path in tqdm(input, desc="Embedding images", unit="img"):
-            pixel_values = self.load_process_image(img_path)['pixel_values']
-            with torch.no_grad():
-                outputs = self.model(pixel_values=pixel_values)
-            emb = outputs.pooler_output[0].cpu().numpy()  # vecteur numpy
-            all_embeddings.append(emb.tolist())
+            tensor_dict = self.load_process_image(img_path)
+            if tensor_dict is not None:
+                pixel_values = tensor_dict['pixel_values']
+                with torch.no_grad():
+                    outputs = self.model(pixel_values=pixel_values)
+                emb = outputs.pooler_output[0].cpu().numpy()  # vecteur numpy
+                all_embeddings.append(emb.tolist())
         
         print("✅ Embeddings finished.")
         return all_embeddings
