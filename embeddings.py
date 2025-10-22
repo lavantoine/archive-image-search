@@ -7,11 +7,12 @@ from pathlib import Path
 import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from tqdm import tqdm
+from utils import get_device
 from chromadb.api.types import Embeddable
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
-    def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = 'cpu') -> None:
+    def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = get_device()) -> None:
         super().__init__()
         self.model_name = model_name
         self.device = device

@@ -3,6 +3,15 @@ from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
 import streamlit as st
+import torch
+
+def get_device() -> str:
+    if torch.backends.mps.is_available():
+        return 'mps'
+    elif torch.cuda.is_available():
+        return 'cuda'
+    else:
+        return 'cpu'
 
 @st.cache_resource
 def get_all_images_path() -> list[Path]:

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ChromaBase():
     def __init__(self) -> None:
-        self.embedding_function = EfficientNetImageEmbedding(device='mps')
+        self.embedding_function = EfficientNetImageEmbedding()
         self.chroma_client = chromadb.PersistentClient(path=Path(__file__).parent / '.local')
         self.collection = self.chroma_client.get_or_create_collection(
             name='my_collection',
