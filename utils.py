@@ -4,6 +4,15 @@ from PIL import Image
 from tqdm import tqdm
 import streamlit as st
 import torch
+import logging
+
+def get_logger(name=__name__) -> logging.Logger:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(), logging.FileHandler("log.log", encoding="utf-8")]
+    )
+    return logging.getLogger(__name__)
 
 def get_device() -> str:
     if torch.backends.mps.is_available():

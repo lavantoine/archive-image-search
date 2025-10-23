@@ -2,14 +2,8 @@ import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings, QueryResult
 from embeddings import EfficientNetImageEmbedding
 from pathlib import Path
-
-import logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("log.log", encoding="utf-8")]
-)
-logger = logging.getLogger(__name__)
+from utils import get_logger
+logger = get_logger(__name__)
 
 class ChromaBase():
     def __init__(self) -> None:

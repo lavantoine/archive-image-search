@@ -10,6 +10,7 @@ from tqdm import tqdm
 from utils import get_device
 from chromadb.api.types import Embeddable
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+import streamlit as st
 
 class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
     def __init__(self, model_name: str = 'google/efficientnet-b0', device: str = get_device()) -> None:
@@ -31,8 +32,11 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
     def __call__(self, input: list[Path]) -> Embeddings:
         all_embeddings = []
         print(f"🔹 Embedding generation for {len(input)} images...")
-
-        for img_path in tqdm(input, desc="Embedding images", unit="img"):
+        
+        n = len(input)
+        text = 'Vérification de l\'encodage des photos, merci de patienter...'
+        bar = st.progress(0.0, text)
+        for i, img_path in enumerate(tqdm(iterable=input, desc="Embedding images", unit="img")):
             tensor_dict = self.load_process_image(img_path)
             if tensor_dict is not None:
                 pixel_values = tensor_dict['pixel_values']
@@ -40,6 +44,9 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
                     outputs = self.model(pixel_values=pixel_values)
                 emb = outputs.pooler_output[0].cpu().numpy()  # vecteur numpy
                 all_embeddings.append(emb.tolist())
+                bar.progress(value=float((i+1)/n), text=f'{text} ({i}/{n})')
+        bar.empty()
+
         
         print("✅ Embeddings finished.")
         return all_embeddings
