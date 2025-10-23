@@ -41,29 +41,6 @@ class ChromaBase():
             metadatas=metadatas
             )
         logger.info(msg=f"{len(embeddings)} embeddings added to collection")
-        
-        # new_ids = []
-        # new_embeddings = []
-        # new_metadatas = []
-        
-        # for id, embedding, metadata in zip(ids, embeddings, metadatas):
-        #     exists = self.collection.get(
-        #         where={'document_id': id},
-        #         include=[]
-        #     )
-        #     found = len(exists['ids']) > 0
-            
-        #     if not found:
-        #         new_ids.append(id)
-        #         new_embeddings.append(embedding)
-        #         new_metadatas.append(metadata)
-        
-        # self.collection.upsert(
-        #     ids=new_ids,
-        #     embeddings=new_embeddings,
-        #     metadatas=new_metadatas
-        #     )
-        # logger.info(msg=f"{len(new_ids)} embeddings added to collection, for {len(ids)} candidates")
 
     def query_image(self, image_to_query: list[Path], n_results: int = 3, include: list = ["distances", 'metadatas']) -> QueryResult:
         return self.collection.query(
