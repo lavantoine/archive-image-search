@@ -38,9 +38,9 @@ class S3():
             else:
                 logger.info(f'⏭️ {filepath.name} already on bucket, skipping...')
         except Exception as e:
-            logger.error(f'Error while uploading file \"{filepath.name}\": {e}')
+            logger.error(f'❌ Error while uploading file \"{filepath.name}\": {e}', exc_info=True)
     
-    def download_file(self, filename) -> BytesIO:
+    def download_file(self, filename, embeddings=True) -> BytesIO:
         try:
             file_obj = BytesIO()
             self.client.download_fileobj(self.bucket, filename, file_obj)
@@ -48,13 +48,14 @@ class S3():
             logger.info(f'⬇️ {filename} accessed')
             return file_obj
         except Exception as e:
-            logger.error(f'Error while retrieving file \"{filename}\": {e}')
-            error_img_path = Path(__file__).parent / '.local/media/404.png'
-            with Image.open(error_img_path) as img:
-                buffer = BytesIO()
-                img.save(buffer, format="PNG")  # ou "PNG", selon ton image
-                buffer.seek(0)  # très important !
-                return buffer
+            logger.error(f'❌ Error while retrieving file \"{filename}\": {e}', exc_info=True)
+            if not embeddings:
+                error_img_path = Path(__file__).parent / '.local/media/404.png'
+                with Image.open(error_img_path) as img:
+                    buffer = BytesIO()
+                    img.save(buffer, format="PNG")  # ou "PNG", selon ton image
+                    buffer.seek(0)  # très important !
+                    return buffer
     
     def file_exists(self, filename):
         try:
@@ -68,3 +69,13 @@ class S3():
     
     def list_buckets(self):
         return [bucket['Name'] for bucket in self.client.list_buckets()]
+    
+    def get_all_files(self):
+        paginator = self.client.get_paginator('list_objects_v2')
+        page_iterator = paginator.paginate(Bucket=self.bucket)
+        
+        all_files = []
+        for page in page_iterator:
+            if 'Content' in page:
+                all_files.extend(obj['Key'] for obj in page['Contents'])
+        return all_files

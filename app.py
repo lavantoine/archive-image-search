@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
-from utils import get_all_images_path, generate_id
+from utils import get_local_images_path, generate_id
 from pathlib import Path
 from chroma_client import ChromaBase
 import torch
@@ -13,31 +13,19 @@ from PIL import Image
 from io import BytesIO
 from s3 import S3
 
-def unsure_uploaded_images(paths):
-    s3 = S3()
-    
-
 @st.cache_resource
-def initialize_s3(images_path):
-    global s3
-    s3 = S3()
-    # s3.upload_files(images_path)
-
-@st.cache_resource
-def initialize_chroma() -> ChromaBase:
-    chroma_base = ChromaBase()
+def initialize_chroma(_bucket_client: S3) -> ChromaBase:
+    chroma_base = ChromaBase(_bucket_client)
     
-    all_images_path = get_all_images_path()
-    all_ids = [generate_id(_) for _ in all_images_path]
+    all_names = _bucket_client.get_all_files()
+    all_ids = [generate_id(_) for _ in all_names]
     
-    # initialize_s3(images_path=all_images_path)
-    
-    new_images_path, new_ids = chroma_base.keep_new_only(all_images_path, ids=all_ids)
-    metadatas = [{"path": str(i_path), "filename": i_path.name} for i_path in new_images_path]
+    new_names, new_ids = chroma_base.keep_new_only(all_names, ids=all_ids)
+    metadatas = [{"path": str(name), "name": name} for name in new_names]
     
     with st.spinner('Vérification de la base vectorielle, merci de patienter...'):
         if new_ids:
-            embeddings = chroma_base.compute_embeddings(filespath=new_images_path)
+            embeddings = chroma_base.compute_embeddings(filespath=new_names)
 
             chroma_base.add_to_collection(
                 ids=new_ids,
@@ -46,19 +34,18 @@ def initialize_chroma() -> ChromaBase:
                 )
         return chroma_base
 
-def main():
-    st.set_page_config(
-        page_title='M2RS 0.1'
-    )
+def main() -> None:
+    # Build Streamlit base page
+    st.set_page_config(page_title='M2RS 0.1')
     st.title('M2RS 0.1')
     st.write('Texte explicatif...')
-    
     with st.sidebar:
         st.subheader('Accueil')
     
+    # Instantiate S3
     s3 = S3()
     
-    chroma_base = initialize_chroma()
+    chroma_base = initialize_chroma(_bucket_client=s3)
     
     uploaded_image = st.file_uploader(label="Merci de choisir une image :", type=["jpg", "jpeg", "png"])
     
@@ -86,7 +73,7 @@ def main():
             # img_path = metadata['path']
             filename = metadata['filename']
             
-            img_bytes = s3.download_file(filename=filename)
+            img_bytes = s3.download_file(filename=filename, embeddings=False)
             
             with cols[i % 3]:
                 st.image(
@@ -96,7 +83,12 @@ def main():
                     )
 
         st.subheader('Debug :')
-        st.write(dict(results))
+        my_results = {}
+        for metadata, distance in zip(dict(results)['metadatas'][0], dict(results)['distances'][0]):
+            name = metadata['filename']
+            my_results[name] = distance
+
+        st.write(dict(my_results))
 
 if __name__ == '__main__':
     main()
