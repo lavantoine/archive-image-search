@@ -27,7 +27,7 @@ class ChromaBase():
         return new_filespath, new_ids
         
     def compute_embeddings(self, filespath):
-        return self.embedding_function(input=filespath)
+        return self.embedding_function.compute_embeddings_batch(input=filespath)
     
     def add_to_collection(self, ids: list[str], embeddings, metadatas):
         self.collection.upsert(
@@ -39,7 +39,7 @@ class ChromaBase():
 
     def query_image(self, image_to_query: list[Path], n_results: int = 3, include: list = ["distances", 'metadatas']) -> QueryResult:
         return self.collection.query(
-            query_embeddings=self.embedding_function(input=image_to_query),
+            query_embeddings=self.embedding_function.compute_one_embedding(input=image_to_query),
             n_results=n_results,
             include=include
             ) # type: ignore

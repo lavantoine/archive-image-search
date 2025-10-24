@@ -76,7 +76,7 @@ def main() -> None:
         cols = st.columns(3)
         for i, metadata in enumerate(results['metadatas'][0]):
             # img_path = metadata['path']
-            filename = metadata['filename']
+            filename = metadata['name']
             
             img_bytes = s3.download_file(filename=filename, embeddings=False)
             
@@ -90,7 +90,7 @@ def main() -> None:
         st.subheader('Debug :')
         my_results = {}
         for metadata, distance in zip(dict(results)['metadatas'][0], dict(results)['distances'][0]):
-            name = metadata['filename']
+            name = metadata['name']
             my_results[name] = distance
 
         st.write(dict(my_results))

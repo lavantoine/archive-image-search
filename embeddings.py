@@ -43,7 +43,17 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
         inputs = self.processor(images=pil_img, return_tensors='pt').to(self.device)
         return inputs
     
-    def __call__(self, input: list[Path | str], batch_size: int = 10):
+    def compute_one_embedding(self, input: list[Path | str]):
+        tensor_dict = self.load_process_image(input[0])
+        if tensor_dict is not None:
+            pixel_values = tensor_dict['pixel_values']
+            with torch.no_grad():
+                outputs = self.model(pixel_values=pixel_values)
+            emb = outputs.pooler_output[0].cpu().numpy().tolist()  # vecteur numpy
+            return [emb]
+    
+    
+    def compute_embeddings_batch(self, input: list[Path | str], batch_size: int = 10):
         logger.info(f"▶️ Embedding generation for {len(input)} images...")
         
         n = len(input)
@@ -54,13 +64,18 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
         # batch_ids = []
         # batch_metadatas = []
         
-        for i, (img_path, id, metadata) in enumerate(iterable=zip(input, ids, metadatas)):
+        for i, img_path in enumerate(input):
             tensor_dict = self.load_process_image(img_path)
             if tensor_dict is not None:
                 pixel_values = tensor_dict['pixel_values']
                 with torch.no_grad():
                     outputs = self.model(pixel_values=pixel_values)
                 emb = outputs.pooler_output[0].cpu().numpy().tolist()  # vecteur numpy
+                
+                # if n == 1:
+                #     bar.empty()
+                #     logger.info("✅ One embedding computed")
+                #     return [emb]
                 
                 batch_embeddings.append(emb)
                 # batch_ids.append(id)
@@ -78,4 +93,4 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
             yield batch_embeddings#, batch_ids, batch_metadatas
 
         bar.empty()
-        logger.info("✅ Embeddings finished.")
+        logger.info("✅ {n} embeddings computed")
