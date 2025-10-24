@@ -18,11 +18,13 @@ logger = get_logger(__name__)
 
 def get_device() -> str:
     if torch.backends.mps.is_available():
-        return 'mps'
+        device = 'mps'
     elif torch.cuda.is_available():
-        return 'cuda'
+        device = 'cuda'
     else:
-        return 'cpu'
+        device = 'cpu'
+    logger.info(f'Using device: {device}')
+    return device
 
 @st.cache_resource
 def get_local_images_path() -> list[Path]:
@@ -51,3 +53,11 @@ def generate_id(path: Path | str) -> str:
     else:
         filename = path.name.lower().strip()
         return hashlib.md5(data=filename.encode("utf-8")).hexdigest()
+
+def get_lorem():
+    return '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac lorem elit. 
+        Sed elit lacus, ultrices nec lacus vel, maximus dapibus ipsum. Pellentesque non consectetur tortor. 
+        Curabitur in enim ac nibh gravida placerat scelerisque a lectus. Maecenas efficitur enim quis pulvinar pellentesque. 
+        Maecenas mollis congue dapibus. Donec quis velit nec lorem gravida aliquam quis ut turpis. Nulla facilisi. 
+        Cras eu eros non mi ultricies sollicitudin eu quis mauris. Nam consequat commodo urna, eu auctor tortor elementum id. 
+        Morbi elit nisi, sodales ut facilisis a, scelerisque non elit. In hac habitasse platea dictumst.'''

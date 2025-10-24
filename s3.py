@@ -7,6 +7,7 @@ from io import BytesIO
 from utils import get_logger
 logger = get_logger(__name__)
 from PIL import Image
+from pprint import pprint
 
 
 class S3():
@@ -50,7 +51,7 @@ class S3():
         except Exception as e:
             logger.error(f'❌ Error while retrieving file \"{filename}\": {e}', exc_info=True)
             if not embeddings:
-                error_img_path = Path(__file__).parent / '.local/media/404.png'
+                error_img_path = Path(__file__).parent / 'media/404.png'
                 with Image.open(error_img_path) as img:
                     buffer = BytesIO()
                     img.save(buffer, format="PNG")  # ou "PNG", selon ton image
@@ -76,6 +77,6 @@ class S3():
         
         all_files = []
         for page in page_iterator:
-            if 'Content' in page:
+            if 'Contents' in page:
                 all_files.extend(obj['Key'] for obj in page['Contents'])
         return all_files

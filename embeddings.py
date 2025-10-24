@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 from s3 import S3
 
 class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
-    def __init__(self, bucket_client: S3, model_name: str = 'google/efficientnet-b0', device: str = get_device()) -> None:
+    def __init__(self, bucket_client: S3, model_name: str = 'google/efficientnet-b7', device: str = get_device()) -> None:
         super().__init__()
         self.bucket_client = bucket_client
         self.model_name = model_name
@@ -43,25 +43,39 @@ class EfficientNetImageEmbedding(EmbeddingFunction[Embeddable]):
         inputs = self.processor(images=pil_img, return_tensors='pt').to(self.device)
         return inputs
     
-    def __call__(self, input: list[Path | str]) -> Embeddings:
-        all_embeddings = []
+    def __call__(self, input: list[Path | str], batch_size: int = 10):
         logger.info(f"▶️ Embedding generation for {len(input)} images...")
         
         n = len(input)
-        text = 'Vérification de l\'encodage des photos, merci de patienter...'
+        text = "Vérification de l'encodage des photos, merci de patienter..."
         bar = st.progress(0.0, text)
         
-        for i, img_path in enumerate(tqdm(iterable=input, desc="Embedding images", unit="img")):
+        batch_embeddings = []
+        # batch_ids = []
+        # batch_metadatas = []
+        
+        for i, (img_path, id, metadata) in enumerate(iterable=zip(input, ids, metadatas)):
             tensor_dict = self.load_process_image(img_path)
             if tensor_dict is not None:
                 pixel_values = tensor_dict['pixel_values']
                 with torch.no_grad():
                     outputs = self.model(pixel_values=pixel_values)
-                emb = outputs.pooler_output[0].cpu().numpy()  # vecteur numpy
-                all_embeddings.append(emb.tolist())
-                bar.progress(value=float((i+1)/n), text=f'{text} ({i}/{n})')
-        bar.empty()
-
+                emb = outputs.pooler_output[0].cpu().numpy().tolist()  # vecteur numpy
+                
+                batch_embeddings.append(emb)
+                # batch_ids.append(id)
+                # batch_metadatas.append(metadata)
+            
+            if len(batch_embeddings) == batch_size:
+                yield batch_embeddings#, batch_ids, batch_metadatas
+                batch_embeddings = []
+                # batch_ids = []
+                # batch_metadatas = []
+                
+            bar.progress(value=float((i+1)/n), text=f'{text} ({i+1}/{n})')
         
-        print("✅ Embeddings finished.")
-        return all_embeddings
+        if batch_embeddings:
+            yield batch_embeddings#, batch_ids, batch_metadatas
+
+        bar.empty()
+        logger.info("✅ Embeddings finished.")

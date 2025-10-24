@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
-from utils import get_local_images_path, generate_id
+from utils import get_local_images_path, generate_id, get_lorem
 from pathlib import Path
 from chroma_client import ChromaBase
 import torch
@@ -20,25 +20,30 @@ def initialize_chroma(_bucket_client: S3) -> ChromaBase:
     all_names = _bucket_client.get_all_files()
     all_ids = [generate_id(_) for _ in all_names]
     
-    new_names, new_ids = chroma_base.keep_new_only(all_names, ids=all_ids)
+    new_names, new_ids = chroma_base.keep_new_only(filespath=all_names, ids=all_ids)
     metadatas = [{"path": str(name), "name": name} for name in new_names]
     
     with st.spinner('Vérification de la base vectorielle, merci de patienter...'):
         if new_ids:
-            embeddings = chroma_base.compute_embeddings(filespath=new_names)
-
-            chroma_base.add_to_collection(
-                ids=new_ids,
-                embeddings=embeddings,
-                metadatas=metadatas
-                )
+            for i, batch_embeddings in enumerate(chroma_base.compute_embeddings(filespath=new_names)):
+                start = i * 10
+                end = start + len(batch_embeddings)
+                
+                batch_ids = new_ids[start:end]
+                batch_metadatas = metadatas[start:end]
+                
+                chroma_base.add_to_collection(
+                    ids=batch_ids,
+                    embeddings=batch_embeddings,
+                    metadatas=batch_metadatas
+                    )
         return chroma_base
 
 def main() -> None:
     # Build Streamlit base page
     st.set_page_config(page_title='M2RS 0.1')
     st.title('M2RS 0.1')
-    st.write('Texte explicatif...')
+    st.write(get_lorem())
     with st.sidebar:
         st.subheader('Accueil')
     

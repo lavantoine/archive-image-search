@@ -2,6 +2,7 @@ import chromadb
 from chromadb import Documents, EmbeddingFunction, Embeddings, QueryResult
 from embeddings import EfficientNetImageEmbedding
 from pathlib import Path
+from pprint import pprint
 from utils import get_logger
 logger = get_logger(__name__)
 
@@ -25,8 +26,8 @@ class ChromaBase():
                 new_ids.append(id)
         return new_filespath, new_ids
         
-    def compute_embeddings(self, filespath) -> Embeddings:
-        return self.embedding_function(filespath)
+    def compute_embeddings(self, filespath):
+        return self.embedding_function(input=filespath)
     
     def add_to_collection(self, ids: list[str], embeddings, metadatas):
         self.collection.upsert(
