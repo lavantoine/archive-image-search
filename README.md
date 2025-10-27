@@ -6,7 +6,8 @@ Démonstration _expérimentale_ (disponible [ici](https://m2rs-01.streamlit.app/
 - [Pandas](https://pandas.pydata.org/) : bibliothèque de référence de manipulation et d'analyse des données.
 - [Numpy](https://numpy.org/) : bibliothèque de calcul scientifique.
 - [PyTorch](https://pytorch.org/) : bibliothèque de machine learning optimisée pour les calculs complexes.
-- [Transformers](https://huggingface.co/docs/transformers/index) : bibliothèque qui centralise les modèles d'apprentissage profonds préentraînés les plus importants. Proposée par [HuggingFace](https://huggingface.co/).
+- [Transformers](https://huggingface.co/docs/transformers/index) : bibliothèque qui centralise les modèles d'apprentissage profonds préentraînés les plus importants.
+  - [EfficientNet](https://huggingface.co/docs/transformers/model_doc/efficientnet) : modèle de réseau de neurones convolutif (CNN) conçu pour la classification d’images, développé par Google.
 - [ChromaDB](https://www.trychroma.com/) : base de données vectorielle optimisée pour l'intelligence artificielle.
 - [Streamlit](https://streamlit.io/) : bibliothèque de génération d'interfaces dédiée à l'intelligence artificielle.
 
@@ -26,4 +27,5 @@ uv sync
 source .venv/bin/activate
 streamlit run app.py
 ```
+
 
