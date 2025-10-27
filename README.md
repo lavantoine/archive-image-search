@@ -9,3 +9,20 @@ Démonstration _expérimentale_ (disponible [ici](https://m2rs-01.streamlit.app/
 - [Transformers](https://huggingface.co/docs/transformers/index) : bibliothèque qui centralise les modèles d'apprentissage profonds préentraînés les plus importants. Proposée par [HuggingFace](https://huggingface.co/).
 - [ChromaDB](https://www.trychroma.com/) : base de données vectorielle optimisée pour l'intelligence artificielle.
 - [Streamlit](https://streamlit.io/) : bibliothèque de génération d'interfaces dédiée à l'intelligence artificielle.
+
+## 🚀 Démarrage rapide
+```shell
+# Si UV n'est pas installé
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Cloner le dépôt
+git clone <URL_DU_REPO>
+cd m2rs-0.1
+
+# Installer les dépendances et initialiser l'environnement
+uv sync
+
+# Lancer l'application
+source .venv/bin/activate
+streamlit run app.py
+```
