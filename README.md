@@ -1,3 +1,15 @@
 # M2RS-0.1
 
-Démonstration expérimentale de la faisabilité d'un moteur de recherche inversé, appliqué à un fond de photographies d'objets d'art de l'entre-deux-guerre.
+Démonstration expérimentale de la faisabilité d'un moteur de recherche inversé, appliqué à un fond de photographies d'objets d'art de l'entre-deux-guerre. Toutes les technologies utilisées sont open source.
+
+Technologies utilisées :
+
+- [Python](https://www.python.org/) : langage de programmation de référence dans le domaine de l'intelligence artificielle.
+- [Pandas](https://pandas.pydata.org/)
+- Numpy
+- ChromaDB
+- PyTorch
+- Pillow
+- transformers
+- Streamlit
+- boto3
