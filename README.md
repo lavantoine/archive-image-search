@@ -16,7 +16,7 @@ Démonstration _expérimentale_ (disponible [ici](https://m2rs-01.streamlit.app/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Cloner le dépôt
-git clone <URL_DU_REPO>
+git clone https://github.com/lavantoine/m2rs-0.1.git
 cd m2rs-0.1
 
 # Installer les dépendances et initialiser l'environnement
@@ -26,3 +26,4 @@ uv sync
 source .venv/bin/activate
 streamlit run app.py
 ```
+
