@@ -1,6 +1,8 @@
 # M2RS-0.1
 
-Démonstration _expérimentale_ (disponible [ici](https://m2rs-01.streamlit.app/)) de la faisabilité d'un **moteur de recherche inversé**, appliqué à un fond de **photographies d'objets d'art**, prises pendant l'entre-deux-guerres. Toutes les technologies utilisées sont **open source** :
+Travail en cours
+
+Recherches sur un **moteur de recherche inversée**(disponible [ici](https://m2rs-01.streamlit.app/)), appliqué à un fond de **photographies d'objets d'art**, prises pendant l'entre-deux-guerres. Toutes les technologies utilisées sont **open source** :
 
 - [Python](https://www.python.org/) : langage de programmation de référence dans le domaine de l'intelligence artificielle, qui profite d'un vaste écosystème de bibliothèques.
 - [Pandas](https://pandas.pydata.org/) : bibliothèque de référence de manipulation et d'analyse des données.
@@ -27,5 +29,6 @@ uv sync
 source .venv/bin/activate
 streamlit run app.py
 ```
+
 
 
