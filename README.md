@@ -1,6 +1,7 @@
-# Essai-0.1
+# Archive Image Search
 
-Travail en cours
+> [!NOTE]
+> Travail en cours.
 
 Recherches sur un **moteur de recherche inversée**(disponible [ici](https://m2rs-01.streamlit.app/)), appliqué à un fond de **photographies d'objets d'art**, prises pendant l'entre-deux-guerres. Toutes les technologies utilisées sont **open source** :
 
@@ -29,6 +30,7 @@ uv sync
 source .venv/bin/activate
 streamlit run app.py
 ```
+
 
 
 
