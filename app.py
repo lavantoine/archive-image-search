@@ -41,9 +41,9 @@ def initialize_chroma(_bucket_client: S3) -> ChromaBase:
 
 def main() -> None:
     # Build Streamlit base page
-    st.set_page_config(page_title='M2RS 0.1')
-    st.title('M2RS 0.1')
-    st.write(get_lorem())
+    st.set_page_config(page_title="Recherche inversée d'images d'archive")
+    st.title("Recherche inversée d'images d'archive")
+    st.write("Cette application permet d'effectuer une recherche inversée sur un échantillon du fond 209SUP du Ministère des Affaires Étrangères (3563 photographies).")
     with st.sidebar:
         st.subheader('Accueil')
     
@@ -52,7 +52,7 @@ def main() -> None:
     
     chroma_base = initialize_chroma(_bucket_client=s3)
     
-    uploaded_image = st.file_uploader(label="Merci de choisir une image :", type=["jpg", "jpeg", "png"])
+    uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg", "jpeg", "png"])
     
     if uploaded_image is not None:
         image_bytes = uploaded_image.getvalue()
